@@ -5,6 +5,14 @@ import Hostings from './Hostings.js';
 import type {AuthState} from './AuthStates.js';
 import type {PermissionsList} from './Permissions.js';
 
+export type Stream = {
+  clientData: {
+    concept: string,
+  },
+  name: string,
+  id: string,
+}
+
 type AppAccess = {
   type: 'app',
   permissions: PermissionsList,
@@ -70,6 +78,16 @@ class Pryv {
       },
     );
     return res.data.token;
+  }
+
+  // GET/streams: retrieve all streams
+  async getStreams (username: string, auth: string): Promise<Array<Stream>> {
+    const res = await axios.get(
+      `${this.core(username)}/streams`, {
+        headers: { Authorization: auth },
+      }
+    );
+    return res.data.streams;
   }
 
   // POST/core: check if requested app access already exists or not,

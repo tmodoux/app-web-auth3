@@ -26,6 +26,10 @@ async function checkAccess (
   // Login against Pryv
   await login(ctx, password);
 
+  // Translate requested permissions: concepts => stream ids
+  const streams = await ctx.pryv.getStreams(ctx.user.username, ctx.user.personalToken);
+  ctx.permissions.translateConcepts(streams);
+
   // Check for existing app access
   const checkApp = await ctx.pryv.checkAppAccess(
     ctx.user.username,
