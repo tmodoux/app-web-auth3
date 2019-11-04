@@ -8,6 +8,7 @@ type Permission = {
   streamId?: string,
   concept?: {
     value: string,
+    type: string,
   },
   level: 'read'|'contribute'|'manage',
   defaultName: ?string,
@@ -33,22 +34,35 @@ class Permissions {
   }
 
   translateConcepts (streams: Array<Stream>): PermissionsList {
-    // TODO: the implementation below is an example, it should be adapted
     this.list.forEach((permission, i, list) => {
-      const concept = permission.concept != null ? permission.concept.value : null;
+      const concept = permission.concept;
       if (concept != null) {
-        const correspondingStream = streams.find((stream) => {
-          return stream.clientData != null && stream.clientData.concept === concept;
-        });
+        const correspondingStream = this.findStream(streams, concept.value, concept.type);
 
         if (correspondingStream == null) {
-          throw new AppError(`Failed to translate concept: ${concept}`);
+          throw new AppError(`Concept not found: ${concept.value}`);
         }
         this.list[i].streamId = correspondingStream.id;
         delete this.list[i].concept;
       }
     });
     return this.list;
+  }
+
+  findStream (streams: Array<Stream>, conceptValue: string, conceptType: string): ?Stream {
+    let foundStream = null;
+    streams.some(iter);
+    return foundStream;
+
+    function iter (stream) {
+      if (stream.clientData != null && stream.clientData.concept != null) {
+        if (stream.clientData.concept.value === conceptValue) {
+          foundStream = stream;
+          return true;
+        }
+      }
+      return Array.isArray(stream.children) && stream.children.some(iter);
+    }
   }
 }
 

@@ -7,10 +7,14 @@ import type {PermissionsList} from './Permissions.js';
 
 export type Stream = {
   clientData: {
-    concept: string,
+    concept: {
+      type: string,
+      value: string,
+    },
   },
   name: string,
   id: string,
+  children: Array<Stream>,
 }
 
 type AppAccess = {

@@ -84,7 +84,7 @@ const createAccessMock = RequestMock()
 
 const getStreamsMock = RequestMock()
   .onRequestTo(getStreamsEndpoint)
-  .respond({streams: [{id: 'concept', clientData: {concept: 'concept'}}]}, 200, {'Access-Control-Allow-Origin': '*'});
+  .respond({streams: [{id: 'concept', clientData: {concept: {value: 'concept'}}}]}, 200, {'Access-Control-Allow-Origin': '*'});
 
 fixture(`Auth request`)
   .page(`http://localhost:8080/auth?key=pollKey`)
