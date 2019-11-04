@@ -55,13 +55,23 @@ class Permissions {
     return foundStream;
 
     function iter (stream) {
-      if (stream.clientData != null && stream.clientData.concept != null) {
-        if (stream.clientData.concept.value === conceptValue) {
-          foundStream = stream;
-          return true;
-        }
+      if (found(conceptType, stream)) {
+        foundStream = stream;
+        return true;
       }
       return Array.isArray(stream.children) && stream.children.some(iter);
+    }
+
+    function found (type: string, stream: Stream) {
+      switch (type) {
+        case 'keyword':
+        case 'coucou':
+        case 'loinc':
+          return stream.clientData != null &&
+            stream.clientData.concept != null &&
+            stream.clientData.concept.value === conceptValue;
+        default: throw new AppError(`Missing definition for concept type: ${conceptType}`);
+      }
     }
   }
 }

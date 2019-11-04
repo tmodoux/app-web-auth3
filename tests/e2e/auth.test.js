@@ -10,7 +10,7 @@ const getStreamsEndpoint = 'https://tmodoux.pryv.me/streams';
 const permissions = [
   {streamId: 'diary', defaultName: 'Diary', level: 'read'},
   {streamId: 'work', defaultName: 'Work', level: 'manage'},
-  {concept: {value: 'concept'}, defaultName: 'Concept', level: 'read'},
+  {concept: {value: 'concept', type: 'keyword'}, defaultName: 'Concept', level: 'read'},
 ];
 const translatedPermissions = [
   {streamId: 'diary', defaultName: 'Diary', level: 'read'},
