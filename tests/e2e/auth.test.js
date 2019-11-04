@@ -140,6 +140,7 @@ test('Auth request, app access check and then accept permissions', async testCon
     .expect(Selector('#appIdText').innerText).contains('App client-app is requesting :')
     .expect(Selector('ul').textContent).contains('A permission on stream Diary with level READ')
     .expect(Selector('ul').textContent).contains('A permission on stream Work with level MANAGE')
+    .expect(Selector('ul').textContent).contains('A permission on stream Concept with level READ')
     // If the user accepts them
     .click('#acceptPermissions')
     // Access creation call is performed
