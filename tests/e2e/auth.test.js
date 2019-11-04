@@ -6,13 +6,21 @@ const emailEndpoint = 'https://reg.pryv.me/test@test.com/uid';
 const userEndpoint = 'https://reg.pryv.me/tmodoux/server';
 const pollEndpoint = 'https://reg.pryv.me/access/pollKey';
 const createAccessEndpoint = 'https://tmodoux.pryv.me/accesses';
+const getStreamsEndpoint = 'https://tmodoux.pryv.me/streams';
 const permissions = [
   {streamId: 'diary', defaultName: 'Diary', level: 'read'},
   {streamId: 'work', defaultName: 'Work', level: 'manage'},
+  {concept: {value: 'concept'}, defaultName: 'Concept', level: 'read'},
+];
+const translatedPermissions = [
+  {streamId: 'diary', defaultName: 'Diary', level: 'read'},
+  {streamId: 'work', defaultName: 'Work', level: 'manage'},
+  {defaultName: 'Concept', level: 'read', streamId: 'concept'},
 ];
 const checkedPermissions = [
   {streamId: 'diary', defaultName: 'Diary', level: 'read'},
   {streamId: 'work', name: 'Work', level: 'manage'},
+  {streamId: 'concept', defaultName: 'Concept', level: 'read'},
 ];
 const needSigninState = {
   status: 'NEED_SIGNIN',
@@ -46,6 +54,8 @@ const createAccessLogger = RequestLogger(createAccessEndpoint, {
   stringifyRequestBody: true,
 });
 
+const getStreamsLogger = RequestLogger(getStreamsEndpoint);
+
 // ---------- Requests mocks ----------
 
 const authRequestMock = RequestMock()
@@ -72,10 +82,14 @@ const createAccessMock = RequestMock()
   .onRequestTo(createAccessEndpoint)
   .respond({access: {token: 'appToken'}}, 200, {'Access-Control-Allow-Origin': '*'});
 
+const getStreamsMock = RequestMock()
+  .onRequestTo(getStreamsEndpoint)
+  .respond({streams: [{id: 'concept', clientData: {concept: 'concept'}}]}, 200, {'Access-Control-Allow-Origin': '*'});
+
 fixture(`Auth request`)
   .page(`http://localhost:8080/auth?key=pollKey`)
-  .requestHooks(authLogger, checkAppLogger, emailLogger, userLogger, pollLogger, createAccessLogger,
-    authRequestMock, checkAppMock, usernameForEmailMock, userExistenceMock, pollMock, createAccessMock);
+  .requestHooks(authLogger, checkAppLogger, emailLogger, userLogger, pollLogger, createAccessLogger, getStreamsLogger,
+    authRequestMock, checkAppMock, usernameForEmailMock, userExistenceMock, pollMock, createAccessMock, getStreamsMock);
 
 test('Auth request, app access check and then accept permissions', async testController => {
   await testController
@@ -110,12 +124,17 @@ test('Auth request, app access check and then accept permissions', async testCon
       record.request.body.includes('"username":"tmodoux"') &&
       record.request.body.includes('"password":"mypass"')
     )).ok()
+    // Get streams call was performed
+    .expect(getStreamsLogger.contains(record =>
+      record.request.method === 'get' &&
+      record.response.statusCode === 200
+    )).ok()
     // Check-app call was performed
     .expect(checkAppLogger.contains(record =>
       record.request.method === 'post' &&
       record.response.statusCode === 200 &&
       record.request.body.includes('"requestingAppId":"client-app"') &&
-      record.request.body.includes(`"requestedPermissions":${JSON.stringify(permissions)}`)
+      record.request.body.includes(`"requestedPermissions":${JSON.stringify(translatedPermissions)}`)
     )).ok()
     // Requested permissions are printed to the user
     .expect(Selector('#appIdText').innerText).contains('App client-app is requesting :')
