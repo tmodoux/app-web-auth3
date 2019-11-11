@@ -65,7 +65,7 @@ class Permissions {
     function found (type: string, stream: Stream) {
       switch (type) {
         case 'keyword':
-        case 'coucou':
+        case 'snomed':
         case 'loinc':
           return stream.clientData != null &&
             stream.clientData.concept != null &&
