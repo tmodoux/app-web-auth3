@@ -5,12 +5,16 @@ import Hostings from './Hostings.js';
 import type {AuthState} from './AuthStates.js';
 import type {PermissionsList} from './Permissions.js';
 
+type SempryvCode = {
+  code: string,
+  display: string,
+  system: string,
+  system_name: string,
+}
+
 export type Stream = {
   clientData: {
-    concept: {
-      type: string,
-      value: string,
-    },
+    'sempryv:codes': { [string]: SempryvCode },
   },
   name: string,
   id: string,

@@ -65,22 +65,27 @@ class Permissions {
     return matchingStreams;
 
     function iter (stream) {
-      if (found(conceptType, stream)) {
+      if (found(stream)) {
         matchingStreams.push(stream);
       }
       return Array.isArray(stream.children) && stream.children.forEach(iter);
     }
 
-    function found (type: string, stream: Stream) {
-      switch (type) {
-        case 'keyword':
-        case 'snomed':
-        case 'loinc':
-          return stream.clientData != null &&
-            stream.clientData.concept != null &&
-            stream.clientData.concept.value === conceptValue;
-        default: throw new AppError(`Missing definition for concept type: ${conceptType}`);
+    function found (stream: Stream) {
+      if (stream.clientData != null) {
+        const sempryvCodes = stream.clientData['sempryv:codes'];
+        if (sempryvCodes != null) {
+          for (const key in sempryvCodes) {
+            const code = sempryvCodes[key];
+            if (conceptType.toUpperCase === 'KEYWORD') {
+              return code != null && code.display != null && code.display.includes(conceptValue);
+            } else {
+              return code != null && code.code === conceptValue;
+            }
+          }
+        }
       }
+      return false;
     }
   }
 }
