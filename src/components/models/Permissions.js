@@ -33,33 +33,42 @@ class Permissions {
     return this.list;
   }
 
-  translateConcepts (streams: Array<Stream>): PermissionsList {
+  translateConcepts (streams: Array<Stream>): void {
+    const translatedPermissions = [];
+
     this.list.forEach((permission, i, list) => {
       const concept = permission.concept;
-      if (concept != null) {
-        const correspondingStream = this.findStream(streams, concept.value, concept.type);
 
-        if (correspondingStream == null) {
+      if (concept == null) {
+        translatedPermissions.push(permission);
+      } else {
+        const matchingStreams = this.findStreams(streams, concept.value, concept.type);
+
+        if (matchingStreams == null || matchingStreams.length < 1) {
           throw new AppError(`Concept not found: ${concept.value}`);
         }
-        this.list[i].streamId = correspondingStream.id;
-        delete this.list[i].concept;
+
+        matchingStreams.forEach(stream => {
+          delete permission.concept;
+          permission.streamId = stream.id;
+          translatedPermissions.push(permission);
+        });
       }
     });
-    return this.list;
+
+    this.updateList(translatedPermissions);
   }
 
-  findStream (streams: Array<Stream>, conceptValue: string, conceptType: string): ?Stream {
-    let foundStream = null;
-    streams.some(iter);
-    return foundStream;
+  findStreams (streams: Array<Stream>, conceptValue: string, conceptType: string): Array<Stream> {
+    const matchingStreams = [];
+    streams.forEach(iter);
+    return matchingStreams;
 
     function iter (stream) {
       if (found(conceptType, stream)) {
-        foundStream = stream;
-        return true;
+        matchingStreams.push(stream);
       }
-      return Array.isArray(stream.children) && stream.children.some(iter);
+      return Array.isArray(stream.children) && stream.children.forEach(iter);
     }
 
     function found (type: string, stream: Stream) {
