@@ -50,7 +50,8 @@ class Permissions {
         if (concept.type === 'KEYWORD') {
           for (const key in translationTable) {
             translationTable[key].forEach(stream => {
-              if (stream.display != null && stream.display.includes(concept.value)) {
+              let value = concept.value.toLowerCase();
+              if (stream.display != null && stream.display.toLowerCase().includes(value)) {
                 addTranslatedPermission(translatedPermissions, permission, stream.id);
                 translated = true;
               }
