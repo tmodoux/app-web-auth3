@@ -34,7 +34,7 @@ class Permissions {
   }
 
   translateConcepts (streams: Array<Stream>): void {
-    const translatedPermissions = [];
+    const translatedPermissions = new Map();
 
     const translationTable = computeTranslationTable(streams);
     this.list.forEach((permission, i, list) => {
@@ -42,7 +42,7 @@ class Permissions {
 
       if (concept == null) {
         // Permission does not need to be translated
-        translatedPermissions.push(permission);
+        addTranslatedPermission(translatedPermissions, permission, permission.streamId);
       } else {
         let translated = false;
         concept.type = concept.type.toUpperCase();
@@ -73,14 +73,30 @@ class Permissions {
       }
     });
 
-    this.updateList(translatedPermissions);
+    this.updateList(Array.from(translatedPermissions.values()));
   }
 }
 
-function addTranslatedPermission (translatedPermissions: Array<Permission>, permission: Permission, streamId: string): void {
-  let translatedPermission = Object.assign({}, permission, {streamId: streamId});
-  delete translatedPermission.concept;
-  translatedPermissions.push(translatedPermission);
+function addTranslatedPermission (translatedPermissions: Map<string, Permission>, permission: Permission, streamId?: string): void {
+  if (streamId != null) {
+    const existingPermission = translatedPermissions.get(streamId);
+    if (existingPermission == null || isLowerLevel(existingPermission, permission)) {
+      let translatedPermission = Object.assign({}, permission, {streamId: streamId});
+      delete translatedPermission.concept;
+      translatedPermissions.set(streamId, translatedPermission);
+    }
+  }
+}
+
+function isLowerLevel (existingPermission: Permission, permission: Permission): boolean {
+  const existingLevel = existingPermission.level;
+  const level = permission.level;
+  switch (existingLevel) {
+    case 'read': return level === 'contribute' || level === 'manage';
+    case 'contribute': return level === 'manage';
+    case 'manage': return false;
+    default: return false;
+  }
 }
 
 function computeTranslationTable (streams: Array<Stream>) {
