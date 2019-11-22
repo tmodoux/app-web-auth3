@@ -14,7 +14,7 @@ type SempryvCode = {
 
 export type Stream = {
   clientData: {
-    'sempryv:codes': { [string]: SempryvCode },
+    'sempryv:codes': { [string]: Array<SempryvCode> },
   },
   name: string,
   id: string,
